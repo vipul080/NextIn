@@ -19,4 +19,4 @@ spring:
     import: optional:file:.env[.properties]
 
 server:
-  port: 8082
+  port: 8081

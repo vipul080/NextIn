@@ -1,11 +1,16 @@
 package com.vipul.nextin.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.Instant;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "clinics")
-public class Clinic {                      // capital C
+public class Clinic {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +31,6 @@ public class Clinic {                      // capital C
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    // Hibernate needs a no-argument constructor
     protected Clinic() {
     }
 
