@@ -40,6 +40,14 @@ public class Clinic {
         createdAt = Instant.now();
     }
 
+
+    public Clinic(String name, String city, String address, String phone) {
+        this.name = name;
+        this.city = city;
+        this.address = address;
+        this.phone = phone;
+    }
+
     public Long getId()          { return id; }
     public String getName()      { return name; }
     public String getCity()      { return city; }
