@@ -1,9 +1,13 @@
 package com.vipul.nextin.service;
 
+import com.vipul.nextin.dto.ClinicRequest;
+import com.vipul.nextin.dto.ClinicResponse;
 import com.vipul.nextin.entity.Clinic;
 import com.vipul.nextin.repository.ClinicRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.beans.Transient;
 import java.util.List;
 
 @Service
@@ -15,8 +19,17 @@ public class ClinicService {
         this.clinicRepository = clinicRepository;
     }
 
-    public List<Clinic> getAllClinics(){
+    @Transactional(readOnly = true)
+    public List<ClinicResponse> getAllClinics(){
+        return clinicRepository.findAll().stream().map(ClinicResponse::from).toList();
+    }
 
-        return clinicRepository.findAll();
+    @Transactional
+    public ClinicResponse createClinic(ClinicRequest request){
+        Clinic clinic = new Clinic(request.name(), request.city(), request.address() , request.phone());
+
+        clinicRepository.save(clinic);
+
+        return ClinicResponse.from(clinic);
     }
 }
