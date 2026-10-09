@@ -7,7 +7,7 @@ import lombok.Setter;
 
 import java.time.Instant;
 
-@Setter
+
 @Getter
 @Entity
 @Table(name="doctors")
@@ -37,5 +37,14 @@ public class Doctor {
 
     @PrePersist
     void onCreate() {createdAt = Instant.now();}
+
+    public Doctor(Clinic clinic, String name, String speciality, Integer avgConsultMinutes) {
+        this.clinic = clinic;
+        this.name = name;
+        this.speciality = speciality;
+        this.avgConsultMinutes = avgConsultMinutes;
+    }
+
+
 
 }
