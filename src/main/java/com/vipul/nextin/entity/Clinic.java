@@ -2,7 +2,6 @@ package com.vipul.nextin.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.Instant;
 
@@ -46,11 +45,4 @@ public class Clinic {
         this.address = address;
         this.phone = phone;
     }
-
-    public Long getId()          { return id; }
-    public String getName()      { return name; }
-    public String getCity()      { return city; }
-    public String getAddress()   { return address; }
-    public String getPhone()     { return phone; }
-    public Instant getCreatedAt() { return createdAt; }
 }
