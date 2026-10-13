@@ -1,6 +1,5 @@
 package com.vipul.nextin.controller;
 
-
 import com.vipul.nextin.dto.DoctorRequest;
 import com.vipul.nextin.dto.DoctorResponse;
 import com.vipul.nextin.service.DoctorService;
