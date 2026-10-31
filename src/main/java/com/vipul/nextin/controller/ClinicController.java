@@ -31,4 +31,9 @@ public class ClinicController {
         ClinicResponse response = clinicService.createClinic(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @GetMapping("/{clinicId}")
+    public ResponseEntity<ClinicResponse> getClinic(@PathVariable Long clinicId){
+        return ResponseEntity.ok(clinicService.getClinic(clinicId));
+    }
 }

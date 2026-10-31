@@ -3,6 +3,7 @@ package com.vipul.nextin.service;
 import com.vipul.nextin.dto.ClinicRequest;
 import com.vipul.nextin.dto.ClinicResponse;
 import com.vipul.nextin.entity.Clinic;
+import com.vipul.nextin.exception.ClinicNotFoundException;
 import com.vipul.nextin.repository.ClinicRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,14 @@ public class ClinicService {
         Clinic clinic = new Clinic(request.name(), request.city(), request.address() , request.phone());
 
         clinicRepository.save(clinic);
+
+        return ClinicResponse.from(clinic);
+    }
+
+    @Transactional(readOnly = true)
+    public ClinicResponse getClinic(Long clinicId){
+        Clinic clinic = clinicRepository.findById(clinicId)
+                .orElseThrow(()-> new ClinicNotFoundException(clinicId));
 
         return ClinicResponse.from(clinic);
     }
