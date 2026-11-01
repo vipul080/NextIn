@@ -8,7 +8,6 @@ import com.vipul.nextin.repository.ClinicRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.beans.Transient;
 import java.util.List;
 
 @Service
@@ -29,9 +28,9 @@ public class ClinicService {
     public ClinicResponse createClinic(ClinicRequest request){
         Clinic clinic = new Clinic(request.name(), request.city(), request.address() , request.phone());
 
-        clinicRepository.save(clinic);
+        Clinic saved = clinicRepository.save(clinic);
 
-        return ClinicResponse.from(clinic);
+        return ClinicResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
