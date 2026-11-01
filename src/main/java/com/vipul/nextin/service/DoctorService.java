@@ -6,6 +6,7 @@ import com.vipul.nextin.dto.DoctorResponse;
 import com.vipul.nextin.entity.Clinic;
 import com.vipul.nextin.entity.Doctor;
 import com.vipul.nextin.exception.ClinicNotFoundException;
+import com.vipul.nextin.exception.DoctorNotFoundException;
 import com.vipul.nextin.repository.ClinicRepository;
 import com.vipul.nextin.repository.DoctorRepository;
 import org.springframework.stereotype.Service;
@@ -44,5 +45,13 @@ public class DoctorService {
         return doctorRepository.findByClinicId(clinicId).stream()
                 .map(DoctorResponse::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public DoctorResponse getDoctor(Long clinicId, Long doctorId) {
+        Doctor doctor = doctorRepository.findByIdAndClinicId(doctorId, clinicId)
+                .orElseThrow(() -> new DoctorNotFoundException(doctorId));
+
+        return DoctorResponse.from(doctor);
     }
 }

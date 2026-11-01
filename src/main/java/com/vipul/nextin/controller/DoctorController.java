@@ -30,4 +30,9 @@ public class DoctorController {
     public ResponseEntity<List<DoctorResponse>> getDoctorsByClinic(@PathVariable Long clinicId) {
         return ResponseEntity.ok(doctorService.getDoctorsByClinic(clinicId));
     }
+
+    @GetMapping("/{doctorId}")
+    public ResponseEntity<DoctorResponse> getDoctor(@PathVariable Long clinicId, @PathVariable Long doctorId) {
+        return ResponseEntity.ok(doctorService.getDoctor(clinicId, doctorId));
+    }
 }
