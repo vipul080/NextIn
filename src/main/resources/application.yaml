@@ -18,5 +18,19 @@ spring:
   config:
     import: optional:file:.env[.properties]
 
+  # Staff log in through our own /api/auth/login with JWTs, so turn off Spring Boot's
+  # built-in default user (otherwise it prints a "generated security password" on startup).
+  autoconfigure:
+    exclude: org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
+
 server:
   port: 8081
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-minutes: 480   # one 8-hour shift
+  admin:
+    # Used once, to create the first admin account if none exists.
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}

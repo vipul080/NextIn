@@ -11,6 +11,8 @@ import com.vipul.nextin.exception.TokenNotFoundException;
 import com.vipul.nextin.repository.DoctorRepository;
 import com.vipul.nextin.repository.TokenCounterRepository;
 import com.vipul.nextin.repository.TokenRepository;
+import com.vipul.nextin.security.ClinicAccessGuard;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,15 +30,18 @@ public class TokenService {
     private final TokenRepository tokenRepository;
     private final TokenCounterRepository tokenCounterRepository;
     private final DoctorRepository doctorRepository;
+    private final ClinicAccessGuard clinicAccessGuard;
     private final Clock clock;
 
     public TokenService(TokenRepository tokenRepository,
                         TokenCounterRepository tokenCounterRepository,
                         DoctorRepository doctorRepository,
+                        ClinicAccessGuard clinicAccessGuard,
                         Clock clock) {
         this.tokenRepository = tokenRepository;
         this.tokenCounterRepository = tokenCounterRepository;
         this.doctorRepository = doctorRepository;
+        this.clinicAccessGuard = clinicAccessGuard;
         this.clock = clock;
     }
 
@@ -64,7 +69,7 @@ public class TokenService {
 
     @Transactional(readOnly = true)
     public List<TokenResponse> getTodayQueue(Long doctorId) {
-        requireDoctor(doctorId);
+        requireStaffOfDoctorsClinic(doctorId);
         return tokenRepository
                 .findByDoctorIdAndQueueDateAndStatusInOrderByTokenNumberAsc(doctorId, today(), ACTIVE_STATUSES)
                 .stream()
@@ -76,7 +81,7 @@ public class TokenService {
     // @Version on Token makes the second update fail, and the handler returns 409.
     @Transactional
     public TokenResponse callNext(Long doctorId) {
-        requireDoctor(doctorId);
+        requireStaffOfDoctorsClinic(doctorId);
         LocalDate today = today();
         if (tokenRepository.existsByDoctorIdAndQueueDateAndStatus(doctorId, today, TokenStatus.IN_CONSULTATION)) {
             throw new InvalidTokenTransitionException(
@@ -94,28 +99,32 @@ public class TokenService {
 
     @Transactional
     public TokenResponse complete(Long tokenId) {
-        Token token = findToken(tokenId);
+        Token token = findTokenForStaff(tokenId);
         token.complete(Instant.now(clock));
         return TokenResponse.from(token);
     }
 
     @Transactional
     public TokenResponse skip(Long tokenId) {
-        Token token = findToken(tokenId);
+        Token token = findTokenForStaff(tokenId);
         token.skip();
         return TokenResponse.from(token);
     }
 
     @Transactional
     public TokenResponse requeue(Long tokenId) {
-        Token token = findToken(tokenId);
+        Token token = findTokenForStaff(tokenId);
         token.requeue();
         return TokenResponse.from(token);
     }
 
+    // Patients have no login, so they prove the token is theirs with the phone number they booked with.
     @Transactional
-    public TokenResponse cancel(Long tokenId) {
+    public TokenResponse cancel(Long tokenId, String patientPhone) {
         Token token = findToken(tokenId);
+        if (!token.getPatientPhone().equals(patientPhone.trim())) {
+            throw new AccessDeniedException("The phone number does not match this token");
+        }
         token.cancel();
         return TokenResponse.from(token);
     }
@@ -160,10 +169,18 @@ public class TokenService {
                 .orElseThrow(() -> new TokenNotFoundException(tokenId));
     }
 
-    private void requireDoctor(Long doctorId) {
-        if (!doctorRepository.existsById(doctorId)) {
-            throw new DoctorNotFoundException(doctorId);
-        }
+    // Loads the token and checks the logged-in staff member works at that token's clinic.
+    private Token findTokenForStaff(Long tokenId) {
+        Token token = findToken(tokenId);
+        clinicAccessGuard.requireStaffOf(token.getDoctor().getClinic().getId());
+        return token;
+    }
+
+    // Checks the doctor exists and the logged-in staff member works at the doctor's clinic.
+    private void requireStaffOfDoctorsClinic(Long doctorId) {
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new DoctorNotFoundException(doctorId));
+        clinicAccessGuard.requireStaffOf(doctor.getClinic().getId());
     }
 
     private LocalDate today() {

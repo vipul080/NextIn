@@ -1,6 +1,7 @@
 package com.vipul.nextin.controller;
 
 import com.vipul.nextin.dto.BookTokenRequest;
+import com.vipul.nextin.dto.CancelTokenRequest;
 import com.vipul.nextin.dto.TokenPositionResponse;
 import com.vipul.nextin.dto.TokenResponse;
 import com.vipul.nextin.service.TokenService;
@@ -41,8 +42,9 @@ public class TokenController {
     }
 
     @PostMapping("/tokens/{tokenId}/cancel")
-    public ResponseEntity<TokenResponse> cancel(@PathVariable Long tokenId) {
-        return ResponseEntity.ok(tokenService.cancel(tokenId));
+    public ResponseEntity<TokenResponse> cancel(@PathVariable Long tokenId,
+                                                @Valid @RequestBody CancelTokenRequest request) {
+        return ResponseEntity.ok(tokenService.cancel(tokenId, request.patientPhone()));
     }
 
     // --- Reception / doctor side ---
